@@ -27,7 +27,6 @@ class Fetcher
 
     public function writeTo($path)
     {
-
         $this->strings['@meta'] = [
             'language' => 'English',
             'author'   => 'Cocopi',
@@ -39,7 +38,10 @@ class Fetcher
             ]
         ];
 
-        $out = sprintf('<?php return %s', var_export($this->strings, true));
+        ksort($this->strings);
+
+
+        $out = sprintf('<?php return %s', $this->var_export54($this->strings));
 
         file_put_contents(rtrim($path, '/').'/en.php', $out);
 
@@ -56,8 +58,32 @@ class Fetcher
     protected function stringsFromFile($path)
     {
         $content = file_get_contents($path);
-        preg_match_all('/(?:\@lang|App\.i18n\.get)\((["\'])([^\1]*?)\1\)/', $content, $matches);
+        preg_match_all('/(?:\@lang|App\.i18n\.get|App\.ui\.notify)\((["\'])([^\1]*?)\1/', $content, $matches);
 
         return $matches[2];
+    }
+
+    /**
+     * src: http://stackoverflow.com/questions/24316347/how-to-format-var-export-to-php5-4-array-syntax
+     */
+    protected function var_export54($var, $indent="")
+    {
+        switch (gettype($var)) {
+            case "string":
+                return '"' . addcslashes($var, "\\\$\"\r\n\t\v\f") . '"';
+            case "array":
+                $indexed = array_keys($var) === range(0, count($var) - 1);
+                $r = [];
+                foreach ($var as $key => $value) {
+                    $r[] = "$indent    "
+                         . ($indexed ? "" : $this->var_export54($key) . " => ")
+                         . $this->var_export54($value, "$indent    ");
+                }
+                return "[\n" . implode(",\n", $r) . "\n" . $indent . "]";
+            case "boolean":
+                return $var ? "TRUE" : "FALSE";
+            default:
+                return var_export($var, TRUE);
+        }
     }
 }
