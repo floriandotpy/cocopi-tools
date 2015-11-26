@@ -41,7 +41,7 @@ class Fetcher
         ksort($this->strings);
 
 
-        $out = sprintf('<?php return %s', $this->var_export54($this->strings));
+        $out = sprintf('<?php return %s;', $this->var_export54($this->strings));
 
         file_put_contents(rtrim($path, '/').'/en.php', $out);
 
