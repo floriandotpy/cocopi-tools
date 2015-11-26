@@ -5,7 +5,7 @@ class Fetcher
 
     protected $strings = [];
 
-    protected $extensions = ["php", "md", "html", "js"];
+    protected $extensions = ["php", "md", "html", "js", "tag"];
 
     public function fetchFrom($path)
     {
@@ -56,7 +56,7 @@ class Fetcher
     protected function stringsFromFile($path)
     {
         $content = file_get_contents($path);
-        preg_match_all('/\@lang\((["\'])([^\1]*?)\1\)/', $content, $matches);
+        preg_match_all('/(?:\@lang|App\.i18n\.get)\((["\'])([^\1]*?)\1\)/', $content, $matches);
 
         return $matches[2];
     }
