@@ -15,7 +15,7 @@ class Fetcher
         foreach ($iterator as $file) {
             if (in_array($file->getExtension(), $this->extensions)) {
 
-                echo "processing ".$file." ...\n";
+                // echo "processing ".$file." ...\n";
                 if($strings = $this->stringsFromFile($file->getPath().'/'.$file->getFilename())) {
                     $this->addStrings($strings);
                 }
@@ -58,7 +58,12 @@ class Fetcher
     protected function stringsFromFile($path)
     {
         $content = file_get_contents($path);
-        preg_match_all('/(?:\@lang|App\.i18n\.get|App\.ui\.notify)\((["\'])([^\1]*?)\1/', $content, $matches);
+
+        // Messages to match:
+        // @lang("<message>")
+        // @App.i18n.get("<message>")
+        // @App.ui.notify("<message>", "success")
+        preg_match_all('/(?:\@lang|App\.i18n\.get|App\.ui\.notify)\((["\'])((?:[^\1]|\\.)*?)\1(,\s*(["\'])((?:[^\4]|\\.)*?)\4)?\)/', $content, $matches);
 
         return $matches[2];
     }
@@ -69,8 +74,6 @@ class Fetcher
     protected function var_export54($var, $indent="")
     {
         switch (gettype($var)) {
-            case "string":
-                return '"' . addcslashes($var, "\\\$\"\r\n\t\v\f") . '"';
             case "array":
                 $indexed = array_keys($var) === range(0, count($var) - 1);
                 $r = [];
@@ -81,9 +84,9 @@ class Fetcher
                 }
                 return "[\n" . implode(",\n", $r) . "\n" . $indent . "]";
             case "boolean":
-                return $var ? "TRUE" : "FALSE";
+                return $var ? "true" : "false";
             default:
-                return var_export($var, TRUE);
+                return var_export($var, true);
         }
     }
 }
